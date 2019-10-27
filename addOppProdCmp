@@ -1,0 +1,169 @@
+<aura:component controller="Opp_addProductsBTN_CTL" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global">
+	
+    <aura:attribute name="products" type="Product2[]"/>
+    <aura:attribute name="saved" type="Boolean" default="false"/>
+    <aura:attribute name="checkedList" type="Boolean[]" default="false"/>
+    <aura:attribute name="IDList" type="String[]" />
+    <aura:attribute name="NameList" type="String[]" />
+    <aura:attribute name="oppLength" type="String" />
+    <aura:attribute name="checkedProduct" type="OpportunityLineItem[]" />
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute name="errors" type="Object" default="[]"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    
+    <!-- The search bar -->
+    <aura:attribute name="objectName" type="String" default="Product2"/>
+    <aura:attribute name="fieldName" type="String" default="Name"/>
+    <aura:attribute name="selectRecordId" type="String"/>
+    <aura:attribute name="selectRecordName" type="String"/>
+    <aura:attribute name="Label" type="String"/>
+    <aura:attribute name="searchRecords" type="List"/>
+    <aura:attribute name="required" type="Boolean" default="false"/>
+    <aura:attribute name="iconName" type="String" default="action:new_account"/>
+    <aura:attribute name="LoadingText" type="Boolean" default="false"/>
+    <!-- End The search bar -->
+    
+    <div class="slds-p-bottom_large slds-p-left_large" hidden="{!v.saved}" style="{!$Resource.QuickActionWidth}">
+        
+        <!-- The search bar -->
+        <div class="slds-form-element">
+            
+            <div class="slds-form-element__control">
+                <div class="slds-combobox_container">
+                    
+                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" aura:id="resultBox" aria-expanded="false" aria-haspopup="listbox" role="combobox">
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon slds-input-has-icon_left-right" role="none">
+                            
+                            <aura:if isTrue="{!!empty(v.selectRecordId)}">
+                                <span class="slds-icon_container slds-icon-utility-search slds-input__icon iconheight">
+                                    <lightning:icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" iconName="{!v.iconName}" size="x-small" alternativeText="icon" />
+                                </span> 
+                            </aura:if>
+                            
+                            <span onkeypress="{!c.searchField}" class="slds-size--11-of-12">
+                            <lightning:input required="{!v.required}" aura:id="userinput" label="{!v.Label}" name="searchText" value="{!v.selectRecordName}" class="leftspace"/> 
+                            </span>
+                                
+                                <aura:if isTrue="{!empty(v.selectRecordId)}">
+                                <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right iconheight">
+                                    <lightning:icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" iconName="utility:search" size="x-small" alternativeText="icon" />
+                                </span> 
+                                <aura:set attribute="else">
+                                    <button class="slds-input__icon slds-input__icon_right slds-button slds-button_icon iconheight" onclick="{!c.resetData}">
+                                        <lightning:icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" iconName="utility:clear" size="x-small" alternativeText="icon" />
+                                        <span class="slds-assistive-text">Clear</span></button>
+                                </aura:set>
+                            </aura:if>
+                        </div>
+                        
+                        <!-- Second part display result -->
+                        <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                <aura:iteration items="{!v.searchRecords}" var="serecord" indexVar="hdtv">
+                                    <li role="presentation" class="slds-listbox__item">
+                                        
+                                        <div id="{!serecord.recId}" data-name="{!serecord.recName}" onclick="{!c.setSelectedRecord}" class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                            <span class="slds-media__figure">
+                                                <span class="slds-icon_container slds-icon-standard-account">
+                                                    <lightning:icon iconName="{!v.iconName}" class="slds-icon slds-icon slds-icon_small slds-icon-text-default" size="x-small"/>
+                                                </span>
+                                            </span>
+                                            <span class="slds-media__body">
+                                                <span class="slds-listbox__option-text slds-listbox__option-text_entity">{!serecord.recName}</span>
+                                                <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{!v.objectName} • {!serecord.recName}</span>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </aura:iteration>
+                                <aura:if isTrue="{!and(v.searchRecords.length == 0 , !v.LoadingText)}">
+                                    No result found.
+                                </aura:if>
+                                <aura:if isTrue="{!v.LoadingText}">
+                                    Loading...
+                                </aura:if>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End The search bar -->
+        
+        <!-- The first form (Products checkbox form) -->
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+             <thead>
+                <tr class="slds-line-height_reset">
+                <th class="" scope="col">
+                        <div class="slds-truncate" title="CHECKED"> </div>
+                </th>
+                <th class="" scope="col">
+                        <div class="slds-truncate" title="PRODUCT NAME">PRODUCT NAME</div>
+                </th>
+                <th class="" scope="col">
+                        <div class="slds-truncate" title="PRODUCT CODE">PRODUCT CODE</div>
+                </th>
+                <th class="" scope="col">
+                        <div class="slds-truncate" title="PRODUCT PACKAGING">PRODUCT PACKAGING</div>
+                </th>
+                <th class="" scope="col">
+                        <div class="slds-truncate" title="PRODUCT FAMILY">PRODUCT FAMILY</div>
+                </th>
+                </tr>
+                </thead>
+            	<aura:iteration items="{!v.products}" var="product" indexVar="index">
+                        <tbody>
+                        <tr class="slds-hint-parent">
+                        <td data-label="Checked">
+                        <!--<ui:inputRadio aura:id="{!index}" click="{!c.onChecked}" value="false"/>-->
+                         <ui:inputCheckbox aura:id="boxPack" value="" change="{!c.onChecked}" name="{!index}"/>
+                        </td>
+                        <td data-label="Account Name">
+                                <div class="slds-truncate" title="PRODUCT NAME">{!product.Name}</div>
+                        </td>
+                        <td data-label="Close Date">
+                                <div class="slds-truncate" title="PRODUCT CODE">{!product.ProductCode}</div>
+                        </td>
+                        <td data-label="Prospecting">
+                                <div class="slds-truncate" title="PRODUCT DESCRIPTION">{!product.ProductPackaging__c}</div>
+                        </td>
+                        <td data-label="Confidence">
+                                <div class="slds-truncate" title="PRODUCT FAMILY">{!product.Family}</div>
+                        </td>
+                        </tr>
+                       </tbody>
+                </aura:iteration>
+        </table>
+        
+        <footer class="modal__footer_directional" style="margin:1.5rem">
+ 			<lightning:button class="next" variant="brand" label="Next" title="Base action" onclick="{!c.handleClick}"/>
+        </footer>
+    </div>
+    <!-- The second form (Input form) -->
+    <div class="slds-p-bottom_large slds-p-left_large" hidden="{!!v.saved}" >
+        <ltng:require styles="{!$Resource.QuickActionWidth}" />
+        <lightning:datatable aura:id="productDataTable"
+                             columns="{!v.columns}"
+                             data="{!v.checkedProduct}"
+                             keyField="Id"
+                             errors="{!v.errors}"
+                             onsave="{!c.onSave}"
+                             showRowNumberColumn="false"
+                             suppressBottomBar="true"
+                             hideCheckboxColumn="true"/>
+        
+        <!-- <footer class="slds-modal__footer_directional" style="margin:1.5rem"> -->
+        <div class="slds-modal__footer_directional slds-align_absolute-center" style="margin:1.5rem">
+        	<lightning:layout horizontalAlign="spread">
+            <lightning:layoutItem size="6" padding="around-small">
+ 				<lightning:button class="slds-button slds-button_brand" label="Back" title="Base action" onclick="{!c.backButton}"/>
+        	</lightning:layoutItem>
+            <lightning:layoutItem size="6" padding="around-small">
+                <lightning:button label="Save" onclick="{!c.onSave}" variant="brand"/>
+            </lightning:layoutItem>
+            </lightning:layout>
+        </div>
+        <!-- </footer> -->
+    </div>
+</aura:component>
