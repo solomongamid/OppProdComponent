@@ -1,0 +1,18 @@
+.THIS {
+}
+
+.THIS .next{
+    float: right;
+}
+
+.THIS .slds-is-absolute{
+    position: static;
+}
+
+.THIS .slds-popover_edit{
+    width: 420px;
+}
+
+.THIS .slds-grid_align-end { 
+    justify-content: flex-start; 
+}

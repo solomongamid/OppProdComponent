@@ -1,0 +1,56 @@
+<aura:component controller="Opp_addProductsBTN_CTL" implements="flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction,flexipage:availableForAllPageTypes,force:appHostable" access="global">
+	<aura:attribute name="OLI" type="OpportunityLineItem" />
+    <aura:attribute name="OLIs" type="OpportunityLineItem[]"/>
+    <aura:attribute name="counter" type="integer"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <!--Refresh the data when there are a changes-->
+    <aura:handler event="force:refreshView" action="{! c.doInit}" />
+    <!--Declare Quick Action API-->
+    <!--<lightning:quickActionAPI aura:id="qaAPI" />-->
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__figure">
+            <span class="slds-icon_container slds-icon-standard-product" title="Products (3+)">
+              <lightning:layoutItem>
+                <lightning:icon iconName="standard:product" />
+              </lightning:layoutItem>
+              <span class="slds-assistive-text">Products {!v.counter}</span>
+            </span>
+          </div>
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <a onclick="{!c.NavigateToEditProduct}" class="slds-card__header-link slds-truncate" title="Products (3+)">
+                <span>Products {!v.counter}</span>
+              </a>
+            </h2>
+          </div>
+          <div class="slds-no-flex">
+              <lightning:button variant="brand" label="Create Opp Products" onclick="{!c.NavigateToCreateProduct}" />
+          </div>
+          
+        </header>
+      </div>
+      <div class="slds-card__body slds-card__body_inner">
+      	  <aura:iteration items="{!v.OLIs}" var="product" indexVar="index" end="3">
+                <div class="custom-box" style="padding-bottom: 15px;">
+                    <span class="slds-card__header-link slds-truncate" title="{!product.Product2.Name}">{!product.Product2.Name}</span>
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_6-of-12">
+                        	<H2>Quantity :</H2>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12">
+                            {!product.Quantity}
+                        </div>
+                    </div>
+                </div>
+            </aura:iteration>
+      </div>
+      <footer class="slds-card__footer">
+        <lightning:button variant="brand" label="Edit Opp Products" onclick="{!c.NavigateToEditProduct}" />
+      </footer>
+    </article>
+
+</aura:component>

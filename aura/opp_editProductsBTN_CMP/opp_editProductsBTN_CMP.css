@@ -1,0 +1,8 @@
+.THIS {
+}
+.THIS .slds-popover_edit{
+    width: 420px;
+}
+.THIS .slds-grid_align-end { 
+    justify-content: flex-start; 
+}

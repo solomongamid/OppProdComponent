@@ -1,0 +1,23 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickActionWithoutHeader"
+                access="global"
+                controller="Opp_addProductsBTN_CTL">
+    <aura:attribute name="data" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <!-- This attribute will hold the update records from data table-->
+    <aura:attribute name="updatedRecord" type="Object[]" />
+	<ltng:require styles="{!$Resource.QuickActionWidth}" />
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+
+    <!-- You must define keyField as 'Id' to save the record back in Salesforce
+	'onsave' attribute will executed when user clicks on save button -->
+    <lightning:card title="Opportunity Product Editable Datatable">
+        <lightning:datatable
+                             aura:id="accountDataTable"
+                             columns="{! v.columns }"
+                             data="{! v.data }"
+                             keyField="Id"
+                             onsave ="{!c.onSave}"
+                             onrowaction="{!c.deleteAction}"
+                             hideCheckboxColumn="true" />
+    </lightning:card>
+</aura:component>
